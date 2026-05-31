@@ -1,0 +1,274 @@
+@if (loading()) {
+  <div class="loading-spinner"><mat-spinner diameter="46" /></div>
+} @else {
+  <div class="client-app">
+    <section class="shop-top">
+      <div>
+        <span class="eyebrow">Entrega en Riohacha</span>
+        <h2>¿Qué quieres pedir hoy?</h2>
+      </div>
+
+      <div class="search-shell">
+        <span class="material-icons">search</span>
+        <input
+          [ngModel]="query()"
+          (ngModelChange)="query.set($event)"
+          placeholder="Buscar restaurantes, mercado, farmacia o productos" />
+      </div>
+
+      <button class="prime-pill" type="button">
+        <span class="material-icons">workspace_premium</span>
+        SIDOM Prime
+      </button>
+    </section>
+
+    <section class="promo-grid">
+      <article class="promo-main">
+        <div>
+          <span class="promo-kicker">Turbo activo</span>
+          <h3>Productos básicos en pocos minutos</h3>
+          <p>Snacks, bebidas, farmacia y mercado express con seguimiento en tiempo real.</p>
+          <button mat-flat-button (click)="selectCategory('turbo')">
+            <span class="material-icons">bolt</span>
+            Ver Turbo
+          </button>
+        </div>
+      </article>
+
+      <article class="promo-side">
+        <span class="material-icons">local_offer</span>
+        <strong>Usa SIDOM10</strong>
+        <small>10% de descuento en tu carrito</small>
+      </article>
+
+      <article class="promo-side support" (click)="supportOpen.set(!supportOpen())">
+        <span class="material-icons">support_agent</span>
+        <strong>Soporte</strong>
+        <small>Reportes, reembolsos y ayuda del pedido</small>
+      </article>
+    </section>
+
+    <section class="category-row">
+      @for (category of categories; track category.id) {
+        <button
+          type="button"
+          class="category-chip"
+          [class.active]="activeCategory() === category.id"
+          (click)="selectCategory(category.id)">
+          <span class="material-icons">{{ category.icon }}</span>
+          {{ category.label }}
+        </button>
+      }
+    </section>
+
+    <div class="client-grid">
+      <main class="market-column">
+        <section class="filters-bar">
+          <mat-form-field appearance="outline">
+            <mat-label>Tiempo máximo</mat-label>
+            <mat-select [ngModel]="maxEta()" (ngModelChange)="maxEta.set($event)">
+              <mat-option [value]="15">15 min</mat-option>
+              <mat-option [value]="30">30 min</mat-option>
+              <mat-option [value]="45">45 min</mat-option>
+              <mat-option [value]="60">60 min</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-checkbox [ngModel]="onlyPromo()" (ngModelChange)="onlyPromo.set($event)">Promociones</mat-checkbox>
+          <div class="recent-searches">
+            @for (item of recent; track item) {
+              <button type="button" (click)="query.set(item)">{{ item }}</button>
+            }
+          </div>
+        </section>
+
+        <section class="store-section">
+          <div class="section-title">
+            <div>
+              <h3>Comercios destacados</h3>
+              <p>{{ filteredStores().length }} opciones disponibles</p>
+            </div>
+            <span class="material-icons">tune</span>
+          </div>
+
+          <div class="store-grid">
+            @for (store of filteredStores(); track store.id) {
+              <article class="store-card">
+                <img [src]="store.image" [alt]="store.name" />
+                <div class="store-body">
+                  <div class="store-head">
+                    <div>
+                      <h4>{{ store.name }}</h4>
+                      <span>{{ store.subtitle }}</span>
+                    </div>
+                    <button class="icon-btn" type="button" [class.saved]="store.favorite">
+                      <span class="material-icons">{{ store.favorite ? 'favorite' : 'favorite_border' }}</span>
+                    </button>
+                  </div>
+                  <div class="store-meta">
+                    <span><span class="material-icons">star</span>{{ store.rating }}</span>
+                    <span><span class="material-icons">schedule</span>{{ store.eta }} min</span>
+                    <span>{{ money(store.deliveryFee) }}</span>
+                  </div>
+                  <div class="tag-row">
+                    @for (tag of store.tags; track tag) {
+                      <span>{{ tag }}</span>
+                    }
+                  </div>
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+
+        <section class="products-section">
+          <div class="section-title">
+            <div>
+              <h3>Productos recomendados</h3>
+              <p>Agrega, combina y confirma tu compra</p>
+            </div>
+          </div>
+
+          <div class="product-grid">
+            @for (entry of visibleProducts(); track entry.product.id) {
+              <article class="product-card">
+                <img [src]="entry.product.image" [alt]="entry.product.name" />
+                @if (entry.product.promo) {
+                  <span class="product-promo">{{ entry.product.promo }}</span>
+                }
+                <div class="product-body">
+                  <span class="store-name">{{ entry.store.name }}</span>
+                  <h4>{{ entry.product.name }}</h4>
+                  <p>{{ entry.product.description }}</p>
+                  <div class="product-bottom">
+                    <strong>{{ money(entry.product.price) }}</strong>
+                    @if (productQty(entry.product.id)) {
+                      <div class="qty-control">
+                        <button type="button" (click)="decrease(entry.product.id)">-</button>
+                        <span>{{ productQty(entry.product.id) }}</span>
+                        <button type="button" (click)="increase(entry.product.id)">+</button>
+                      </div>
+                    } @else {
+                      <button mat-flat-button class="add-btn" (click)="add(entry.product, entry.store)">
+                        <span class="material-icons">add</span>
+                      </button>
+                    }
+                  </div>
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+
+        <section class="extras-grid">
+          <article>
+            <span class="material-icons">history</span>
+            <h4>Historial</h4>
+            <p>Reordena compras frecuentes y consulta recibos desde Mis Pedidos.</p>
+          </article>
+          <article>
+            <span class="material-icons">payments</span>
+            <h4>Pagos</h4>
+            <p>Tarjeta, efectivo, billetera digital o cuenta SIDOM.</p>
+          </article>
+          <article>
+            <span class="material-icons">flight_takeoff</span>
+            <h4>Servicios</h4>
+            <p>Favor, cash, recargas, paquetes y compras especiales.</p>
+          </article>
+        </section>
+
+        @if (supportOpen()) {
+          <section class="support-panel">
+            <h3>Centro de ayuda</h3>
+            <div>
+              <button type="button">Reportar problema</button>
+              <button type="button">Solicitar reembolso</button>
+              <button type="button">Chat de soporte</button>
+              <button type="button">Historial de casos</button>
+            </div>
+          </section>
+        }
+      </main>
+
+      <aside class="cart-panel">
+        <div class="cart-head">
+          <div>
+            <h3>Carrito</h3>
+            <span>{{ cartCount() }} producto{{ cartCount() !== 1 ? 's' : '' }}</span>
+          </div>
+          @if (cart().length) {
+            <button type="button" (click)="clearCart()">Vaciar</button>
+          }
+        </div>
+
+        @if (!cart().length) {
+          <div class="empty-cart">
+            <span class="material-icons">shopping_bag</span>
+            <strong>Tu carrito está vacío</strong>
+            <p>Explora categorías y agrega tus productos favoritos.</p>
+          </div>
+        } @else {
+          <div class="cart-items">
+            @for (item of cart(); track item.product.id) {
+              <div class="cart-item">
+                <img [src]="item.product.image" [alt]="item.product.name" />
+                <div>
+                  <strong>{{ item.product.name }}</strong>
+                  <span>{{ item.store.name }}</span>
+                  <small>{{ money(item.product.price) }}</small>
+                </div>
+                <div class="qty-control compact">
+                  <button type="button" (click)="decrease(item.product.id)">-</button>
+                  <span>{{ item.quantity }}</span>
+                  <button type="button" (click)="increase(item.product.id)">+</button>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="checkout-box">
+            <mat-form-field appearance="outline">
+              <mat-label>Dirección</mat-label>
+              <input matInput [ngModel]="deliveryAddress()" (ngModelChange)="deliveryAddress.set($event)" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Cupón</mat-label>
+              <input matInput [ngModel]="coupon()" (ngModelChange)="coupon.set($event)" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Método de pago</mat-label>
+              <mat-select [ngModel]="selectedPayment()" (ngModelChange)="selectedPayment.set($event)">
+                <mat-option value="Tarjeta terminada en 4242">Tarjeta terminada en 4242</mat-option>
+                <mat-option value="Efectivo">Efectivo</mat-option>
+                <mat-option value="SIDOM Wallet">SIDOM Wallet</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Propina</mat-label>
+              <mat-select [ngModel]="tip()" (ngModelChange)="tip.set($event)">
+                <mat-option [value]="0">Sin propina</mat-option>
+                <mat-option [value]="2000">$2.000</mat-option>
+                <mat-option [value]="4000">$4.000</mat-option>
+                <mat-option [value]="6000">$6.000</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="totals">
+            <span><em>Productos</em><strong>{{ money(subtotal()) }}</strong></span>
+            <span><em>Envío</em><strong>{{ money(deliveryFee()) }}</strong></span>
+            <span><em>Descuento</em><strong>-{{ money(discount()) }}</strong></span>
+            <span><em>Propina</em><strong>{{ money(tip()) }}</strong></span>
+            <span class="total"><em>Total</em><strong>{{ money(total()) }}</strong></span>
+          </div>
+
+          <button mat-flat-button class="checkout-btn" (click)="confirmOrder()" [disabled]="ordering()">
+            @if (ordering()) { <mat-spinner diameter="18" /> }
+            <span class="material-icons">lock</span>
+            Confirmar pedido
+          </button>
+        }
+      </aside>
+    </div>
+  </div>
+}

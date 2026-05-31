@@ -83,6 +83,18 @@ class LoginView(APIView):
             name = f"{usuario.domiciliario.nombresDomiciliario} {usuario.domiciliario.apellidosDomiciliario}"
             entity_id = usuario.domiciliario.id
 
+        if rol_frontend == 'CLIENTE' and not entity_id:
+            return Response(
+                {'error': 'Este usuario CLIENTE no está vinculado a un cliente. Corrige el vínculo desde Usuarios.'},
+                status=status.HTTP_409_CONFLICT
+            )
+
+        if rol_frontend == 'DOMICILIARIO' and not entity_id:
+            return Response(
+                {'error': 'Este usuario DOMICILIARIO no está vinculado a un domiciliario. Corrige el vínculo desde Usuarios.'},
+                status=status.HTTP_409_CONFLICT
+            )
+
         return Response({
             'id': usuario.id,
             'name': name,
@@ -90,6 +102,33 @@ class LoginView(APIView):
             'role': rol_frontend,
             'entityId': entity_id,
         })
+
+
+class CambiarPasswordView(APIView):
+    """POST {usuarioId, passwordActual, passwordNuevo} → cambia la contraseña verificando la actual."""
+
+    def post(self, request):
+        usuario_id    = request.data.get('usuarioId')
+        pwd_actual    = request.data.get('passwordActual', '')
+        pwd_nuevo     = request.data.get('passwordNuevo', '')
+
+        if len(pwd_nuevo) < 8:
+            return Response(
+                {'error': 'La nueva contraseña debe tener mínimo 8 caracteres'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            usuario = Usuario.objects.get(id=usuario_id)
+        except Usuario.DoesNotExist:
+            return Response({'error': 'Usuario no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
+        if not check_password(pwd_actual, usuario.passwordUsuario):
+            return Response({'error': 'La contraseña actual es incorrecta'}, status=status.HTTP_400_BAD_REQUEST)
+
+        usuario.passwordUsuario = make_password(pwd_nuevo)
+        usuario.save()
+        return Response({'message': 'Contraseña actualizada correctamente'})
 
 
 class RegistroView(APIView):

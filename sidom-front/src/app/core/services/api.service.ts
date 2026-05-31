@@ -24,6 +24,10 @@ export class ApiService {
     return this.http.put<T>(`${this.baseUrl}/${path}/${id}/`, body);
   }
 
+  protected partialUpdate<T>(path: string, id: number, body: Partial<T>): Observable<T> {
+    return this.http.patch<T>(`${this.baseUrl}/${path}/${id}/`, body);
+  }
+
   protected remove(path: string, id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${path}/${id}/`);
   }

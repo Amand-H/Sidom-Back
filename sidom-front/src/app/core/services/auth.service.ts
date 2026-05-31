@@ -17,7 +17,12 @@ export class AuthService {
   private loadFromStorage(): AuthUser | null {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : null;
+      const user = raw ? JSON.parse(raw) as AuthUser : null;
+      if (user && user.role !== 'ADMIN' && !user.entityId) {
+        localStorage.removeItem(STORAGE_KEY);
+        return null;
+      }
+      return user;
     } catch { return null; }
   }
 
@@ -70,6 +75,13 @@ export class AuthService {
         throw msg;
       })
     );
+  }
+
+  cambiarPassword(passwordActual: string, passwordNuevo: string): Observable<void> {
+    const usuarioId = this.currentUser()?.id;
+    return this.http.post<void>(`${this.base}/usuarios/cambiar-password/`, {
+      usuarioId, passwordActual, passwordNuevo,
+    });
   }
 
   register(payload: Record<string, any>): Observable<AuthUser> {

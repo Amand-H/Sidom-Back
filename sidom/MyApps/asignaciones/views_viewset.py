@@ -49,6 +49,19 @@ class SolicitudDisponibleViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["get"])
     def panel(self, request):
+        # Auto-publicar cualquier solicitud VALIDADA que aún no tenga SolicitudDisponible
+        from MyApps.solicitudes.models import Solicitud as SolicitudModel
+        pendientes = SolicitudModel.objects.filter(
+            tipoEstado__codigoTipo="VALIDADA"
+        ).exclude(
+            disponibles__tipoEstado__codigoTipo__in=["PUBLICADA", "ACEPTADA"]
+        )
+        for sol in pendientes:
+            try:
+                publicar_solicitud(sol)
+            except Exception:
+                pass
+
         qs = self.get_queryset().filter(tipoEstado__codigoTipo="PUBLICADA", domiciliario__isnull=True)
         return Response(self.get_serializer(qs, many=True).data)
 

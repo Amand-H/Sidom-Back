@@ -16,10 +16,24 @@ export const routes: Routes = [
     component: LayoutComponent,
     canActivate: [authGuard],
     children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      {
+        path: '',
+        pathMatch: 'full',
+        loadComponent: () => import('./pages/role-redirect').then(m => m.RoleRedirectComponent)
+      },
       {
         path: 'dashboard',
         loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.DashboardComponent)
+      },
+      {
+        path: 'inicio',
+        canActivate: [roleGuard('CLIENTE')],
+        loadComponent: () => import('./pages/cliente-home/cliente-home').then(m => m.ClienteHomeComponent)
+      },
+      {
+        path: 'buscar',
+        canActivate: [roleGuard('CLIENTE')],
+        loadComponent: () => import('./pages/cliente-home/cliente-home').then(m => m.ClienteHomeComponent)
       },
       {
         path: 'clientes',
@@ -62,9 +76,29 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/tipos-maestra/tipos-maestra').then(m => m.TiposMaestraComponent)
       },
       {
+        path: 'pedidos-disponibles',
+        canActivate: [roleGuard('DOMICILIARIO', 'ADMIN')],
+        loadComponent: () => import('./pages/pedidos-disponibles/pedidos-disponibles').then(m => m.PedidosDisponiblesComponent)
+      },
+      {
+        path: 'en-ruta',
+        canActivate: [roleGuard('DOMICILIARIO', 'ADMIN')],
+        loadComponent: () => import('./pages/en-ruta/en-ruta').then(m => m.EnRutaComponent)
+      },
+      {
+        path: 'historial-domi',
+        canActivate: [roleGuard('DOMICILIARIO', 'ADMIN')],
+        loadComponent: () => import('./pages/historial-domi/historial-domi').then(m => m.HistorialDomiComponent)
+      },
+      {
         path: 'mis-domicilios',
         canActivate: [roleGuard('CLIENTE', 'ADMIN')],
         loadComponent: () => import('./pages/mis-domicilios/mis-domicilios').then(m => m.MisDomiciliosComponent)
+      },
+      {
+        path: 'historial-cliente',
+        canActivate: [roleGuard('CLIENTE', 'ADMIN')],
+        loadComponent: () => import('./pages/historial-cliente/historial-cliente').then(m => m.HistorialClienteComponent)
       },
       {
         path: 'mi-perfil',

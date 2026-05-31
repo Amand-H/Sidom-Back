@@ -61,10 +61,30 @@ export class UsuarioDialogComponent implements OnInit {
     });
   }
 
+  private rolSeleccionadoCodigo(): string {
+    const roleId = this.form.value.tipoRol;
+    return this.roles().find(r => r.id === roleId)?.codigoTipo || '';
+  }
+
   save() {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
-    this.saving = true;
     const val = this.form.value as Usuario;
+
+    const rolCodigo = this.rolSeleccionadoCodigo();
+    if (rolCodigo === 'ROL_CLIENTE' && !val.cliente) {
+      this.snack.open('Un usuario CLIENTE debe estar vinculado a un cliente', 'Cerrar', { duration: 4000, panelClass: 'snack-error' });
+      return;
+    }
+    if (rolCodigo === 'ROL_DOMI' && !val.domiciliario) {
+      this.snack.open('Un usuario DOMICILIARIO debe estar vinculado a un domiciliario', 'Cerrar', { duration: 4000, panelClass: 'snack-error' });
+      return;
+    }
+    if (rolCodigo === 'ROL_ADMIN') {
+      val.cliente = null;
+      val.domiciliario = null;
+    }
+
+    this.saving = true;
     if (!val.passwordUsuario) delete val.passwordUsuario;
     const obs = this.isEdit ? this.service.put(this.data!.id!, val) : this.service.post(val);
     obs.subscribe({

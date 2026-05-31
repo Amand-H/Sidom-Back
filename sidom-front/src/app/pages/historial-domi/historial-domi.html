@@ -1,0 +1,67 @@
+<div class="hist-header">
+  <div>
+    <h2>Historial de Entregas</h2>
+    <p>Todas tus entregas registradas</p>
+  </div>
+  <div class="search-box">
+    <span class="material-icons">search</span>
+    <input placeholder="Buscar dirección..." (input)="filter($event)" />
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="loading-spinner"><mat-spinner diameter="48"/></div>
+} @else {
+  <div class="table-card">
+    <mat-table [dataSource]="dataSource" matSort>
+
+      <ng-container matColumnDef="seguimientoId">
+        <mat-header-cell *matHeaderCellDef mat-sort-header>#</mat-header-cell>
+        <mat-cell *matCellDef="let r">#{{ r.seguimientoId }}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="dirEntrega">
+        <mat-header-cell *matHeaderCellDef>Dirección de entrega</mat-header-cell>
+        <mat-cell *matCellDef="let r" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" [title]="r.dirEntrega">
+          {{ r.dirEntrega }}
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="estado">
+        <mat-header-cell *matHeaderCellDef>Estado</mat-header-cell>
+        <mat-cell *matCellDef="let r"><span [class]="estadoBadge(r.estadoActual)">{{ r.estadoNombre }}</span></mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="cumplimiento">
+        <mat-header-cell *matHeaderCellDef>Cumplimiento</mat-header-cell>
+        <mat-cell *matCellDef="let r">
+          <span [class]="cumplimientoBadge(r.cumplimiento)">
+            {{ r.cumplimiento === 'A_TIEMPO' ? '✓ A tiempo' : r.cumplimiento === 'CON_RETRASO' ? '⚠ Retraso' : '— Pendiente' }}
+          </span>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="fechaEstimada">
+        <mat-header-cell *matHeaderCellDef mat-sort-header>Fecha estimada</mat-header-cell>
+        <mat-cell *matCellDef="let r">{{ fmtFecha(r.fechaEstimada) }}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="fechaReal">
+        <mat-header-cell *matHeaderCellDef>Fecha real</mat-header-cell>
+        <mat-cell *matCellDef="let r">{{ r.fechaReal ? fmtFecha(r.fechaReal) : '—' }}</mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="columns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: columns;"></mat-row>
+      <tr class="mat-row" *matNoDataRow>
+        <td [attr.colspan]="columns.length">
+          <div class="empty-state">
+            <span class="material-icons">history</span>
+            <h4>Sin historial de entregas</h4>
+          </div>
+        </td>
+      </tr>
+    </mat-table>
+    <mat-paginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons />
+  </div>
+}

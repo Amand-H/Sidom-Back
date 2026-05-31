@@ -1,0 +1,104 @@
+<div class="ruta-layout">
+
+  <!-- ====== PANEL IZQUIERDO: entregas activas ====== -->
+  <div class="ruta-panel">
+    <div class="ruta-header">
+      <div>
+        <h2>En Ruta</h2>
+        <p>{{ entregas().length }} entrega{{ entregas().length !== 1 ? 's' : '' }} activa{{ entregas().length !== 1 ? 's' : '' }}</p>
+      </div>
+      <div class="ruta-header-actions">
+        <button mat-icon-button (click)="load()" title="Actualizar"><mat-icon>refresh</mat-icon></button>
+      </div>
+    </div>
+
+    @if (loading()) {
+      <div class="loading-spinner"><mat-spinner diameter="40"/></div>
+    } @else if (entregas().length === 0) {
+      <div class="ruta-empty">
+        <span class="material-icons">delivery_dining</span>
+        <h3>Sin entregas activas</h3>
+        <p>Acepta un pedido disponible para que aparezca aquí.</p>
+      </div>
+    } @else {
+      @for (e of entregas(); track e.seguimientoId) {
+        <div class="entrega-card" [class.entrega-card--sel]="selected()?.seguimientoId === e.seguimientoId"
+             (click)="selectEntrega(e)">
+
+          <!-- Info de la entrega -->
+          <div class="ec-top">
+            <div class="ec-icon">
+              <span class="material-icons">local_shipping</span>
+            </div>
+            <div class="ec-info">
+              <span class="ec-dir">{{ e.dirEntrega }}</span>
+              <span class="ec-meta">Seguimiento #{{ e.seguimientoId }} · Asig. #{{ e.asignacionId }}</span>
+            </div>
+            <span class="badge {{ estadoBadge(e.estadoActual) }}">{{ e.estadoNombre }}</span>
+          </div>
+
+          <!-- GPS info -->
+          <div class="ec-gps" [class.ec-gps--activo]="e.lat">
+            <span class="material-icons">{{ e.lat ? 'my_location' : 'location_off' }}</span>
+            <span>{{ e.lat ? 'GPS: ' + formatHora(e.hora) : 'Sin ubicación GPS aún' }}</span>
+            @if (e.cumplimiento !== 'PENDIENTE') {
+              <span class="badge {{ e.cumplimiento === 'A_TIEMPO' ? 'success' : 'danger' }}" style="margin-left:auto;font-size:10px">
+                {{ e.cumplimiento === 'A_TIEMPO' ? '✓ A tiempo' : '⚠ Con retraso' }}
+              </span>
+            }
+          </div>
+
+          <!-- Acciones de estado -->
+          <div class="ec-actions">
+            @for (paso of estadosFlow; track paso.codigo) {
+              @if (paso.codigo !== 'CON_NOVEDAD') {
+                <button mat-flat-button class="btn-estado"
+                        [style.background]="isNextStep(e, paso.codigo) ? paso.color : '#f5f7fa'"
+                        [style.color]="isNextStep(e, paso.codigo) ? '#fff' : '#b0bec5'"
+                        [disabled]="!isNextStep(e, paso.codigo)"
+                        (click)="$event.stopPropagation(); cambiarEstado(e, paso.codigo)">
+                  <mat-icon style="font-size:16px">{{ paso.icon }}</mat-icon>
+                  {{ paso.label }}
+                </button>
+              }
+            }
+            <button mat-flat-button class="btn-novedad"
+                    (click)="$event.stopPropagation(); abrirNovedad(e)">
+              <mat-icon style="font-size:16px">report_problem</mat-icon>
+              Incidencia
+            </button>
+          </div>
+
+        </div>
+      }
+    }
+  </div>
+
+  <!-- ====== PANEL DERECHO: mapa + GPS ====== -->
+  <div class="ruta-map-panel">
+    <div class="map-sticky">
+
+      <!-- Botón GPS -->
+      <div class="gps-bar">
+        <div class="gps-bar-info">
+          <span class="material-icons" [style.color]="gpsActivo() ? '#4caf50' : '#90a4ae'">
+            {{ gpsActivo() ? 'gps_fixed' : 'gps_off' }}
+          </span>
+          <span>{{ gpsLabel() }}</span>
+          @if (gpsActivo()) {
+            <span class="gps-pulse"></span>
+          }
+        </div>
+        <button mat-flat-button [class]="gpsActivo() ? 'btn-gps-stop' : 'btn-gps-start'" (click)="toggleGps()">
+          <mat-icon>{{ gpsActivo() ? 'stop_circle' : 'play_circle' }}</mat-icon>
+          {{ gpsActivo() ? 'Detener' : 'Iniciar GPS' }}
+        </button>
+      </div>
+
+      <!-- Mapa -->
+      <div #mapEl class="ruta-map"></div>
+
+    </div>
+  </div>
+
+</div>

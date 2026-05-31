@@ -24,4 +24,5 @@ export class AsignacionService extends ApiService {
   putAsignacion(id: number, d: Asignacion): Observable<Asignacion> { return this.update<Asignacion>('asignaciones/asignaciones', id, d); }
   delAsignacion(id: number): Observable<void>             { return this.remove('asignaciones/asignaciones', id); }
   gpsActivo(): Observable<any[]>                          { return this.http.get<any[]>(`${this.baseUrl}/asignaciones/asignaciones/gps-activo/`); }
+  cargaDomiciliario(id: number): Observable<any>          { return this.http.get<any>(`${this.baseUrl}/asignaciones/asignaciones/carga-domiciliario/?domiciliario=${id}`); }
 }

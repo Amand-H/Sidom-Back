@@ -94,7 +94,7 @@ export class RegisterComponent {
     this.auth.register(payload).subscribe({
       next: () => {
         this.loading.set(false);
-        this.router.navigate(['/dashboard']);
+        this.router.navigate([this.rol() === 'CLIENTE' ? '/inicio' : '/asignaciones']);
       },
       error: (msg: string) => {
         this.loading.set(false);

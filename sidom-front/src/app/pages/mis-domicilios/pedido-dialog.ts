@@ -145,30 +145,43 @@ export class PedidoDialogComponent implements OnInit {
 
   save() {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+
+    const user = this.auth.currentUser();
+    if (!user?.entityId) {
+      this.snack.open(
+        'Tu usuario cliente no está vinculado a un registro de cliente. Cierra sesión, vuelve a entrar o pide al administrador que corrija el vínculo.',
+        'Cerrar',
+        { duration: 7000, panelClass: 'snack-error' }
+      );
+      return;
+    }
+
     this.saving.set(true);
 
-    // Estado PENDIENTE buscado dinámicamente, o fallback a primer estado
+    // El backend asigna y valida el estado automáticamente al crear.
+    // Solo necesitamos pasar un tipoEstado válido como placeholder (PENDIENTE).
+    // Usamos el primer tipo disponible con código PENDIENTE, o el primer tipo de la lista.
     this.tipoSvc.getAll().subscribe(tipos => {
-      const pendiente = tipos.find(t => t.codigoTipo === 'PENDIENTE');
+      const pendiente = tipos.find(t => t.codigoTipo === 'PENDIENTE') ?? tipos[0];
       if (!pendiente) {
-        this.snack.open('No se encontró el estado PENDIENTE en el sistema', 'Cerrar', { duration: 4000 });
+        this.snack.open('Error al cargar configuración del sistema', 'Cerrar', { duration: 4000 });
         this.saving.set(false);
         return;
       }
 
-      const entityId = this.auth.currentUser()?.entityId;
-      if (!entityId) { this.saving.set(false); return; }
-
       const payload = {
         ...this.form.value,
-        cliente: entityId,
+        cliente: user.entityId,
         tipoEstado: pendiente.id,
         tipoMotivoRechazo: null,
       };
 
       this.svc.post(payload as any).subscribe({
-        next: () => {
-          this.snack.open('¡Pedido enviado! Pronto será procesado.', 'OK', { duration: 4000, panelClass: 'snack-success' });
+        next: (sol: any) => {
+          const msg = sol?.tipoEstadoCodigo === 'RECHAZADA'
+            ? 'Pedido recibido pero fue rechazado automáticamente. Revisa los datos.'
+            : '¡Pedido enviado! Un domiciliario lo tomará en breve.';
+          this.snack.open(msg, 'OK', { duration: 5000, panelClass: sol?.tipoEstadoCodigo === 'RECHAZADA' ? 'snack-error' : 'snack-success' });
           this.dialogRef.close(true);
         },
         error: (err) => {

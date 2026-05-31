@@ -8,7 +8,9 @@ from MyApps.solicitudes.services import (
     cliente_tiene_solicitud_activa,
     estadisticas_solicitudes,
     reintentar_solicitud_rechazada,
+    validar_y_clasificar_solicitud,
 )
+from MyApps.asignaciones.services import publicar_solicitud
 from MyApps.usuarios.models import Cliente
 
 
@@ -21,6 +23,14 @@ class SolicitudViewSet(viewsets.ModelViewSet):
         "tipoMotivoRechazo",
     )
     serializer_class = SolicitudSerializer
+
+    def perform_create(self, serializer):
+        """Al crear una solicitud: validar automáticamente y publicarla al pool si es válida."""
+        solicitud = serializer.save()
+        validar_y_clasificar_solicitud(solicitud)
+        solicitud.save(update_fields=["tipoEstado", "tipoMotivoRechazo"])
+        if solicitud.tipoEstado.codigoTipo == "VALIDADA":
+            publicar_solicitud(solicitud)
 
     @action(detail=True, methods=["post"])
     def reintentar(self, request, pk=None):

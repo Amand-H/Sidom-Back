@@ -1,0 +1,73 @@
+<div class="pd-header">
+  <div>
+    <h2>Pedidos Disponibles</h2>
+    <p>Pedidos publicados esperando un domiciliario</p>
+  </div>
+  <button mat-icon-button (click)="load()" title="Actualizar">
+    <mat-icon>refresh</mat-icon>
+  </button>
+</div>
+
+@if (loading()) {
+  <div class="loading-spinner"><mat-spinner diameter="48" /></div>
+} @else if (pedidos().length === 0) {
+  <div class="pd-empty">
+    <span class="material-icons">inbox</span>
+    <h3>No hay pedidos disponibles</h3>
+    <p>En cuanto el administrador publique pedidos, aparecerán aquí.</p>
+    <button mat-stroked-button (click)="load()">
+      <mat-icon>refresh</mat-icon> Volver a intentar
+    </button>
+  </div>
+} @else {
+  <div class="pd-grid">
+    @for (card of pedidos(); track card.disp.id) {
+      <div class="pd-card">
+
+        <div class="pd-card-top">
+          <div class="pd-svc-icon">
+            <span class="material-icons">{{ svcIcon(card.servicio) }}</span>
+          </div>
+          <div class="pd-svc-info">
+            <span class="pd-svc-name">{{ card.servicio }}</span>
+            <span class="pd-svc-zona">
+              <span class="material-icons">location_on</span>{{ card.zona }}
+            </span>
+          </div>
+          <span class="badge info">#{{ card.disp.id }}</span>
+        </div>
+
+        <div class="pd-desc">{{ card.descripcion }}</div>
+
+        <div class="pd-addresses">
+          @if (card.dirRecogida) {
+            <div class="pd-addr-row">
+              <span class="addr-dot green"></span>
+              <span>{{ card.dirRecogida }}</span>
+            </div>
+          }
+          <div class="pd-addr-row">
+            <span class="addr-dot red"></span>
+            <span>{{ card.dirEntrega }}</span>
+          </div>
+        </div>
+
+        <div class="pd-card-footer">
+          <span class="pd-fecha">
+            <mat-icon style="font-size:14px;vertical-align:middle">schedule</mat-icon>
+            {{ card.disp.fechaPublicacionSolicitudDisponible | slice:0:10 }}
+          </span>
+          <button mat-flat-button class="btn-aceptar" [disabled]="card.accepting" (click)="aceptar(card)">
+            @if (card.accepting) {
+              <mat-spinner diameter="16" />
+            } @else {
+              <mat-icon>how_to_reg</mat-icon>
+            }
+            Aceptar pedido
+          </button>
+        </div>
+
+      </div>
+    }
+  </div>
+}

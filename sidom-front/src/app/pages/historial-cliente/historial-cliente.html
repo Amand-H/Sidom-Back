@@ -1,0 +1,59 @@
+<div class="hc-header">
+  <h2>Historial de Pedidos</h2>
+  <p>Pedidos completados y rechazados</p>
+</div>
+
+@if (loading()) {
+  <div class="loading-spinner"><mat-spinner diameter="48" /></div>
+} @else if (cards().length === 0) {
+  <div class="hc-empty">
+    <span class="material-icons">history</span>
+    <h3>Sin pedidos en el historial</h3>
+    <p>Los pedidos entregados o rechazados aparecerán aquí.</p>
+  </div>
+} @else {
+  <div class="hc-grid">
+    @for (card of cards(); track card.solicitud.id) {
+      <div class="hc-card" [class.hc-card--rechazada]="card.estadoCodigo === 'RECHAZADA'">
+
+        <div class="hc-card-top">
+          <div class="hc-svc-icon" [class.hc-icon--rechazada]="card.estadoCodigo === 'RECHAZADA'">
+            <span class="material-icons">
+              {{ card.estadoCodigo === 'RECHAZADA' ? 'cancel' : serviceIcon(card.tipoServicioNombre) }}
+            </span>
+          </div>
+          <div class="hc-info">
+            <span class="hc-desc">{{ card.solicitud.descripcionSolicitud }}</span>
+            <span class="hc-meta">
+              #{{ card.solicitud.id }} · {{ card.tipoServicioNombre }} · {{ card.solicitud.fechaSolicitud }}
+            </span>
+          </div>
+          <span class="badge {{ card.estadoCodigo === 'ENTREGADA' ? 'success' : 'danger' }}">
+            {{ card.estadoNombre }}
+          </span>
+        </div>
+
+        <div class="hc-address">
+          <span class="material-icons">flag</span>
+          {{ card.solicitud.direccionEntregaSolicitud }}
+        </div>
+
+        @if (card.domiciliario) {
+          <div class="hc-domi">
+            <span class="material-icons">delivery_dining</span>
+            <span>{{ card.domiciliario.nombresDomiciliario }} {{ card.domiciliario.apellidosDomiciliario }}</span>
+            <span class="hc-domi-placa">{{ card.domiciliario.placaDomiciliario }}</span>
+          </div>
+        }
+
+        @if (card.fechaAsignacion) {
+          <div class="hc-footer">
+            <span class="material-icons">calendar_today</span>
+            Asignado el {{ card.fechaAsignacion }}
+          </div>
+        }
+
+      </div>
+    }
+  </div>
+}

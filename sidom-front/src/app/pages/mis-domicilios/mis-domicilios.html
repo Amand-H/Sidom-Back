@@ -125,6 +125,15 @@
           <div class="msi-row">
             <span class="material-icons">info</span>
             <strong>{{ selected()!.solicitud.descripcionSolicitud }}</strong>
+            <!-- Indicador de actualización GPS en vivo -->
+            <span class="gps-live-badge" [class.gps-live-badge--updating]="gpsUpdating()">
+              @if (gpsUpdating()) {
+                <mat-spinner diameter="10" style="display:inline-block;margin-right:4px"/>
+              } @else {
+                <span class="gps-pulse-dot"></span>
+              }
+              EN VIVO · {{ ultimaActual() }}
+            </span>
           </div>
           <div class="msi-row msi-dest">
             <span class="material-icons">flag</span>
@@ -138,7 +147,7 @@
           } @else {
             <div class="msi-row msi-nogps">
               <span class="material-icons">location_off</span>
-              Sin ubicación GPS del domiciliario aún
+              Sin ubicación GPS aún — actualizando cada 10 s
             </div>
           }
         </div>

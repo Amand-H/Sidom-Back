@@ -308,3 +308,39 @@
   height: 480px;
   width: 100%;
 }
+
+/* ---- Badge EN VIVO ---- */
+.gps-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #2e7d32;
+  background: #e8f5e9;
+  padding: 2px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.gps-live-badge--updating {
+  color: #1565c0;
+  background: #e3f2fd;
+}
+
+.gps-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #4caf50;
+  flex-shrink: 0;
+  animation: gpsPulse 1.5s infinite;
+}
+
+@keyframes gpsPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.5; transform: scale(1.4); }
+}

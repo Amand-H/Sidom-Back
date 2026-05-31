@@ -1,70 +1,166 @@
-<div class="perfil-container">
-  @if (loading()) {
-    <div class="loading-spinner"><mat-spinner diameter="40" /></div>
-  } @else if (error()) {
-    <div class="perfil-error">
-      <span class="material-icons">error_outline</span>
-      {{ error() }}
+@if (loading()) {
+  <div class="loading-spinner"><mat-spinner diameter="48" /></div>
+} @else {
+<div class="perfil-wrap">
+
+  <!-- Avatar + nombre -->
+  <div class="perfil-hero">
+    <div class="perfil-avatar-wrap">
+      <span class="material-icons perfil-avatar-icon">account_circle</span>
     </div>
-  } @else {
-    <div class="perfil-card">
-      <div class="perfil-avatar">
-        <span class="material-icons">account_circle</span>
-      </div>
-      <div class="perfil-name">{{ user()?.name }}</div>
-      <div class="perfil-role-badge" [class]="'role-' + user()?.role?.toLowerCase()">
+    <div class="perfil-hero-info">
+      <h2>{{ user()?.name }}</h2>
+      <span class="perfil-role-chip" [class]="'chip-' + user()?.role?.toLowerCase()">
         {{ user()?.role === 'CLIENTE' ? 'Cliente' : 'Domiciliario' }}
-      </div>
-
-      @if (cliente(); as c) {
-        <div class="perfil-fields">
-          <div class="perfil-field">
-            <span class="field-label"><span class="material-icons">badge</span> Identificación</span>
-            <span class="field-value">{{ c.identificacionCliente }}</span>
-          </div>
-          <div class="perfil-field">
-            <span class="field-label"><span class="material-icons">person</span> Nombre completo</span>
-            <span class="field-value">{{ c.nombresCliente }} {{ c.apellidosCliente }}</span>
-          </div>
-          <div class="perfil-field">
-            <span class="field-label"><span class="material-icons">email</span> Correo electrónico</span>
-            <span class="field-value">{{ c.correoCliente }}</span>
-          </div>
-          <div class="perfil-field">
-            <span class="field-label"><span class="material-icons">phone</span> Teléfono</span>
-            <span class="field-value">{{ c.telefonoCliente }}</span>
-          </div>
-          <div class="perfil-field">
-            <span class="field-label"><span class="material-icons">home</span> Dirección</span>
-            <span class="field-value">{{ c.direccionCliente }}</span>
-          </div>
-        </div>
-      }
-
-      @if (domiciliario(); as d) {
-        <div class="perfil-fields">
-          <div class="perfil-field">
-            <span class="field-label"><span class="material-icons">badge</span> Identificación</span>
-            <span class="field-value">{{ d.identificacionDomiciliario }}</span>
-          </div>
-          <div class="perfil-field">
-            <span class="field-label"><span class="material-icons">person</span> Nombre completo</span>
-            <span class="field-value">{{ d.nombresDomiciliario }} {{ d.apellidosDomiciliario }}</span>
-          </div>
-          <div class="perfil-field">
-            <span class="field-label"><span class="material-icons">phone</span> Teléfono</span>
-            <span class="field-value">{{ d.telefonoDomiciliario }}</span>
-          </div>
-          <div class="perfil-field">
-            <span class="field-label"><span class="material-icons">two_wheeler</span> Tipo de vehículo</span>
-            <span class="field-value">{{ d.tipoVehiculoDomiciliario }}</span>
-          </div>
-          <div class="perfil-field">
-            <span class="field-label"><span class="material-icons">directions_car</span> Placa</span>
-            <span class="field-value">{{ d.placaDomiciliario }}</span>
-          </div>
-        </div>
-      }
+      </span>
+      <span class="perfil-username">@{{ user()?.username }}</span>
     </div>
-  }
+  </div>
+
+  <!-- Tabs -->
+  <mat-tab-group animationDuration="200ms" class="perfil-tabs">
+
+    <!-- ── Tab 1: Información personal ── -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon style="margin-right:6px;font-size:18px">person</mat-icon>
+        Información personal
+      </ng-template>
+
+      <div class="tab-body" [formGroup]="infoForm">
+
+        <!-- Identificación (solo lectura) -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Identificación</mat-label>
+          <input matInput formControlName="identificacion" [readonly]="true" />
+          <mat-icon matSuffix>badge</mat-icon>
+          <mat-hint>La identificación no se puede modificar</mat-hint>
+        </mat-form-field>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline">
+            <mat-label>Nombres</mat-label>
+            <input matInput formControlName="nombres" />
+            @if (infoForm.get('nombres')?.invalid && infoForm.get('nombres')?.touched) {
+              <mat-error>Mínimo 3 caracteres</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Apellidos</mat-label>
+            <input matInput formControlName="apellidos" />
+            @if (infoForm.get('apellidos')?.invalid && infoForm.get('apellidos')?.touched) {
+              <mat-error>Mínimo 3 caracteres</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Teléfono</mat-label>
+          <input matInput formControlName="telefono" />
+          <mat-icon matSuffix>phone</mat-icon>
+        </mat-form-field>
+
+        @if (user()?.role === 'CLIENTE') {
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Correo electrónico</mat-label>
+            <input matInput formControlName="correo" type="email" />
+            <mat-icon matSuffix>email</mat-icon>
+            @if (infoForm.get('correo')?.hasError('email') && infoForm.get('correo')?.touched) {
+              <mat-error>Correo inválido</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Dirección</mat-label>
+            <input matInput formControlName="direccion" />
+            <mat-icon matSuffix>home</mat-icon>
+          </mat-form-field>
+        }
+
+        @if (user()?.role === 'DOMICILIARIO') {
+          <div class="form-row">
+            <mat-form-field appearance="outline">
+              <mat-label>Tipo de vehículo</mat-label>
+              <mat-select formControlName="tipoVehiculo">
+                <mat-option value="Moto">Moto</mat-option>
+                <mat-option value="Bicicleta">Bicicleta</mat-option>
+                <mat-option value="Carro">Carro</mat-option>
+                <mat-option value="Patineta">Patineta eléctrica</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Placa del vehículo</mat-label>
+              <input matInput formControlName="placa" style="text-transform:uppercase" />
+              <mat-icon matSuffix>two_wheeler</mat-icon>
+            </mat-form-field>
+          </div>
+        }
+
+        <div class="tab-footer">
+          <button mat-flat-button class="btn-save" (click)="guardarInfo()" [disabled]="saving()">
+            @if (saving()) { <mat-spinner diameter="18" /> }
+            <mat-icon>save</mat-icon>
+            Guardar cambios
+          </button>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- ── Tab 2: Contraseña ── -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon style="margin-right:6px;font-size:18px">lock</mat-icon>
+        Contraseña
+      </ng-template>
+
+      <div class="tab-body" [formGroup]="pwdForm">
+        <div class="pwd-hint">
+          <span class="material-icons">info</span>
+          Ingresa tu contraseña actual para poder establecer una nueva.
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Contraseña actual</mat-label>
+          <input matInput formControlName="passwordActual"
+                 [type]="showCurrent() ? 'text' : 'password'" />
+          <button matSuffix mat-icon-button type="button" (click)="showCurrent.set(!showCurrent())">
+            <mat-icon>{{ showCurrent() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (pwdForm.get('passwordActual')?.hasError('required') && pwdForm.get('passwordActual')?.touched) {
+            <mat-error>Ingresa tu contraseña actual</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nueva contraseña</mat-label>
+          <input matInput formControlName="passwordNuevo"
+                 [type]="showNew() ? 'text' : 'password'" />
+          <button matSuffix mat-icon-button type="button" (click)="showNew.set(!showNew())">
+            <mat-icon>{{ showNew() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (pwdForm.get('passwordNuevo')?.hasError('minlength') && pwdForm.get('passwordNuevo')?.touched) {
+            <mat-error>Mínimo 8 caracteres</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Confirmar nueva contraseña</mat-label>
+          <input matInput formControlName="passwordConfirm"
+                 [type]="showConfirm() ? 'text' : 'password'" />
+          <button matSuffix mat-icon-button type="button" (click)="showConfirm.set(!showConfirm())">
+            <mat-icon>{{ showConfirm() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <div class="tab-footer">
+          <button mat-flat-button class="btn-save btn-pwd" (click)="cambiarPassword()" [disabled]="savingPwd()">
+            @if (savingPwd()) { <mat-spinner diameter="18" /> }
+            <mat-icon>lock_reset</mat-icon>
+            Cambiar contraseña
+          </button>
+        </div>
+      </div>
+    </mat-tab>
+
+  </mat-tab-group>
 </div>
+}

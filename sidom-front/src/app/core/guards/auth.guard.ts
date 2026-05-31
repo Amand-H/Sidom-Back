@@ -16,6 +16,9 @@ export const roleGuard = (...roles: UserRole[]): CanActivateFn => {
     const router = inject(Router);
     if (!auth.isLoggedIn()) return router.createUrlTree(['/login']);
     if (auth.hasRole(...roles)) return true;
+    const currentRole = auth.currentUser()?.role;
+    if (currentRole === 'CLIENTE') return router.createUrlTree(['/inicio']);
+    if (currentRole === 'DOMICILIARIO') return router.createUrlTree(['/asignaciones']);
     return router.createUrlTree(['/dashboard']);
   };
 };

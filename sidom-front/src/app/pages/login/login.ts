@@ -46,7 +46,12 @@ export class LoginComponent {
     this.auth.login(username!, password!).subscribe({
       next: (user) => {
         this.loading.set(false);
-        this.router.navigate(['/dashboard']);
+        const target = user.role === 'CLIENTE'
+          ? '/inicio'
+          : user.role === 'DOMICILIARIO'
+            ? '/asignaciones'
+            : '/dashboard';
+        this.router.navigate([target]);
       },
       error: (msg) => {
         this.loading.set(false);

@@ -1,0 +1,79 @@
+.hc-header { margin-bottom: 20px; }
+.hc-header h2 { font-size: 20px; font-weight: 700; color: #1a2035; margin: 0 0 2px; }
+.hc-header p  { font-size: 12px; color: #8090b0; margin: 0; }
+
+.hc-empty {
+  text-align: center;
+  padding: 56px 24px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+}
+.hc-empty .material-icons { font-size: 56px; color: #cfd8dc; display: block; margin-bottom: 12px; }
+.hc-empty h3 { font-size: 17px; font-weight: 700; color: #455a64; margin: 0 0 6px; }
+.hc-empty p  { font-size: 13px; color: #90a4ae; margin: 0; }
+
+.hc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 14px;
+}
+
+.hc-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  overflow: hidden;
+  border-left: 4px solid #4caf50;
+}
+.hc-card--rechazada { border-left-color: #ef5350; opacity: 0.85; }
+
+.hc-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px 10px;
+}
+
+.hc-svc-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: #e8f5e9;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.hc-svc-icon .material-icons { color: #2e7d32; font-size: 20px; }
+.hc-icon--rechazada           { background: #ffebee; }
+.hc-icon--rechazada .material-icons { color: #ef5350; }
+
+.hc-info { flex: 1; min-width: 0; }
+.hc-desc {
+  display: block;
+  font-size: 13px; font-weight: 600; color: #1a2035;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.hc-meta { font-size: 11px; color: #8090b0; margin-top: 2px; }
+
+.hc-address {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 16px 8px;
+  font-size: 12px; color: #546e7a;
+  border-top: 1px solid #f5f7fa;
+}
+.hc-address .material-icons { font-size: 14px; color: #ef5350; }
+
+.hc-domi {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 16px;
+  font-size: 12px; color: #455a64;
+  background: #f0f7ff;
+  border-top: 1px solid #e3f2fd;
+}
+.hc-domi .material-icons { font-size: 16px; color: #1565c0; }
+.hc-domi-placa { margin-left: auto; font-size: 11px; color: #8090b0; }
+
+.hc-footer {
+  display: flex; align-items: center; gap: 5px;
+  padding: 7px 16px;
+  font-size: 11px; color: #90a4ae;
+  border-top: 1px solid #f5f7fa;
+}
+.hc-footer .material-icons { font-size: 13px; }

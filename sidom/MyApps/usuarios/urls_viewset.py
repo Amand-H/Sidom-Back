@@ -6,6 +6,7 @@ from MyApps.usuarios.views_viewset import (
     UsuarioViewSet,
     LoginView,
     RegistroView,
+    CambiarPasswordView,
 )
 
 router = DefaultRouter()
@@ -14,6 +15,7 @@ router.register(r'domiciliarios', DomiciliarioViewSet)
 router.register(r'usuarios',     UsuarioViewSet)
 
 urlpatterns = router.urls + [
-    path('login/',    LoginView.as_view(),    name='login'),
-    path('registro/', RegistroView.as_view(), name='registro'),
+    path('login/',            LoginView.as_view(),          name='login'),
+    path('registro/',         RegistroView.as_view(),        name='registro'),
+    path('cambiar-password/', CambiarPasswordView.as_view(), name='cambiar-password'),
 ]

@@ -97,10 +97,27 @@ class UsuarioSerializer(serializers.ModelSerializer):
     def validate(self, data):
         cliente = data.get("cliente", getattr(self.instance, "cliente", None))
         domiciliario = data.get("domiciliario", getattr(self.instance, "domiciliario", None))
+        tipo_rol = data.get("tipoRol", getattr(self.instance, "tipoRol", None))
 
         if cliente and domiciliario:
             raise serializers.ValidationError(
                 "Un usuario solo puede estar vinculado a cliente o a domiciliario"
+            )
+
+        codigo_rol = tipo_rol.codigoTipo if tipo_rol else ""
+        if codigo_rol == "ROL_CLIENTE" and not cliente:
+            raise serializers.ValidationError(
+                "Un usuario con rol CLIENTE debe estar vinculado a un cliente."
+            )
+
+        if codigo_rol == "ROL_DOMI" and not domiciliario:
+            raise serializers.ValidationError(
+                "Un usuario con rol DOMICILIARIO debe estar vinculado a un domiciliario."
+            )
+
+        if codigo_rol == "ROL_ADMIN" and (cliente or domiciliario):
+            raise serializers.ValidationError(
+                "Un usuario ADMIN no debe estar vinculado a cliente ni domiciliario."
             )
 
         return data
