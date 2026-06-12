@@ -44,6 +44,12 @@ class SolicitudDisponible(models.Model):
         related_name="estados_solicitud_disponible"
     )
 
+    grupoSolicitudDisponible = models.IntegerField(
+        db_column="SOLI_DISP_GRUPO",
+        null=True,
+        blank=True
+    )
+
     def __str__(self):
         return f"Solicitud disponible #{self.id}"
 

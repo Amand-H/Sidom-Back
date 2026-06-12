@@ -93,6 +93,24 @@
               <mat-icon matSuffix>two_wheeler</mat-icon>
             </mat-form-field>
           </div>
+
+          @if (puntajeDomiciliario() !== null) {
+            <div class="puntaje-card" [class]="puntajeClass()">
+              <div class="puntaje-label">
+                <span class="material-icons">star</span>
+                Mi puntaje de desempeño
+              </div>
+              <div class="puntaje-valor">{{ puntajeDomiciliario() }} <span class="puntaje-max">/ 100</span></div>
+              <div class="puntaje-barra">
+                <div class="puntaje-fill" [style.width.%]="puntajeDomiciliario()"></div>
+              </div>
+              <p class="puntaje-desc">
+                @if ((puntajeDomiciliario() ?? 0) >= 80) { Excelente rendimiento. ¡Sigue así! }
+                @else if ((puntajeDomiciliario() ?? 0) >= 50) { Rendimiento regular. Procura mejorar los tiempos. }
+                @else { Puntaje bajo. Las entregas a tiempo mejorarán tu calificación. }
+              </p>
+            </div>
+          }
         }
 
         <div class="tab-footer">

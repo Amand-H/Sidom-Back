@@ -43,10 +43,10 @@
           </mat-select>
         </mat-form-field>
         <mat-form-field appearance="outline">
-          <mat-label>Placa (Ej: ABC123)</mat-label>
-          <input matInput formControlName="placaDomiciliario" placeholder="ABC123" />
+          <mat-label>Placa</mat-label>
+          <input matInput formControlName="placaDomiciliario" placeholder="ABC123 o ABC12D" />
           @if (form.get('placaDomiciliario')?.hasError('pattern')) {
-            <mat-error>Formato: 3 letras + 3 números (ABC123)</mat-error>
+            <mat-error>Formato inválido. Ej: ABC123 o ABC12D</mat-error>
           }
         </mat-form-field>
       </div>

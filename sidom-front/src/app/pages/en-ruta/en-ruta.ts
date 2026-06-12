@@ -6,11 +6,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { EntregaService } from '../../core/services/entrega.service';
+import { AsignacionService } from '../../core/services/asignacion.service';
 import { TrackingService } from '../../core/services/tracking.service';
-import { TipoMaestraService } from '../../core/services/tipo-maestra.service';
 import { AuthService } from '../../core/services/auth.service';
 import { NovedadRapidaDialogComponent } from './novedad-rapida-dialog';
-import { forkJoin } from 'rxjs';
 
 export interface EntregaActiva {
   seguimientoId: number;
@@ -40,20 +39,19 @@ const ESTADOS_ENTREGA = [
 })
 export class EnRutaComponent implements OnInit, AfterViewInit, OnDestroy {
   private entregaSvc  = inject(EntregaService);
+  private asignSvc    = inject(AsignacionService);
   private trackingSvc = inject(TrackingService);
-  private tipoSvc     = inject(TipoMaestraService);
   private auth        = inject(AuthService);
   private dialog      = inject(MatDialog);
   private snack       = inject(MatSnackBar);
 
   @ViewChild('mapEl') mapEl!: ElementRef;
 
-  loading       = signal(true);
-  entregas      = signal<EntregaActiva[]>([]);
-  selected      = signal<EntregaActiva | null>(null);
-  gpsActivo     = signal(false);
-  gpsLabel      = signal('Compartir ubicación');
-  estadosMap    = new Map<string, number>();   // codigo → id TipoMaestra
+  loading   = signal(true);
+  entregas  = signal<EntregaActiva[]>([]);
+  selected  = signal<EntregaActiva | null>(null);
+  gpsActivo = signal(false);
+  gpsLabel  = signal('Compartir ubicación');
 
   private map:     L.Map | null    = null;
   private markers: L.CircleMarker[] = [];
@@ -73,33 +71,30 @@ export class EnRutaComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   load() {
-    const entityId = this.auth.currentUser()?.entityId;
+    const user = this.auth.currentUser();
+    const entityId = user?.entityId;
     this.loading.set(true);
 
-    forkJoin({
-      tiempoReal: this.entregaSvc.tiempoReal(),
-      tipos:      this.tipoSvc.getAll(),
-    }).subscribe({
-      next: ({ tiempoReal, tipos }) => {
-        tipos.forEach(t => { if (t.codigoTipo) this.estadosMap.set(t.codigoTipo, t.id!); });
+    // Use the ORM-based endpoint: filters by domiciliario_id server-side,
+    // returns consistent camelCase fields — no view column name guessing.
+    const request$ = (user?.role === 'DOMICILIARIO' && entityId)
+      ? this.asignSvc.misActivas(entityId)
+      : this.asignSvc.misActivas();   // admin: no filter → all active deliveries
 
-        const tipoNombreMap = new Map(tipos.map(t => [t.codigoTipo ?? '', t.nombreTipo]));
-
-        const activas: EntregaActiva[] = (tiempoReal as any[])
-          .filter(r => !entityId || r.domiciliario === entityId)
-          .filter(r => r.estadoActual !== 'ENTREGADO')
-          .map(r => ({
-            seguimientoId: r.seguimiento,
-            asignacionId:  r.asignacion,
-            descripcion:   r.direccionEntrega ?? 'Sin descripción',
-            dirEntrega:    r.direccionEntrega ?? '',
-            estadoActual:  r.estadoActual ?? '',
-            estadoNombre:  tipoNombreMap.get(r.estadoActual) ?? r.estadoActual,
-            cumplimiento:  r.cumplimiento ?? 'PENDIENTE',
-            lat:           r.ultimaLatitud  ? parseFloat(r.ultimaLatitud)  : null,
-            lng:           r.ultimaLongitud ? parseFloat(r.ultimaLongitud) : null,
-            hora:          r.ultimaFechaHora ?? null,
-          }));
+    request$.subscribe({
+      next: (data: any[]) => {
+        const activas: EntregaActiva[] = data.map(r => ({
+          seguimientoId: r.seguimientoId ?? 0,
+          asignacionId:  r.asignacionId  ?? 0,
+          descripcion:   r.descripcion   ?? 'Sin descripción',
+          dirEntrega:    r.dirEntrega    ?? '',
+          estadoActual:  r.estadoActual  ?? 'PENDIENTE',
+          estadoNombre:  r.estadoNombre  ?? 'Pendiente',
+          cumplimiento:  r.cumplimiento  ?? 'PENDIENTE',
+          lat:  r.lat  != null ? Number(r.lat)  : null,
+          lng:  r.lng  != null ? Number(r.lng)  : null,
+          hora: r.hora ?? null,
+        }));
 
         this.entregas.set(activas);
         this.selected.set(activas[0] ?? null);
@@ -118,15 +113,18 @@ export class EnRutaComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   cambiarEstado(entrega: EntregaActiva, codigo: string) {
-    const tipoId = this.estadosMap.get(codigo);
-    if (!tipoId) { this.snack.open('Estado no encontrado', 'Cerrar', { duration: 3000 }); return; }
-
-    this.entregaSvc.cambiarEstado(entrega.seguimientoId, tipoId).subscribe({
+    this.entregaSvc.cambiarEstadoSp(entrega.seguimientoId, codigo).subscribe({
       next: () => {
         this.snack.open(`Estado actualizado: ${codigo}`, 'OK', { duration: 3000, panelClass: 'snack-success' });
+        if (codigo === 'ENTREGADO') {
+          this.entregaSvc.actualizarDesempeno(entrega.seguimientoId).subscribe();
+        }
         this.load();
       },
-      error: err => this.snack.open(err?.error?.detail || 'Error al actualizar estado', 'Cerrar', { duration: 4000, panelClass: 'snack-error' }),
+      error: err => this.snack.open(
+        err?.error?.detail || err?.error?.resultado || 'Error al actualizar estado',
+        'Cerrar', { duration: 4000, panelClass: 'snack-error' }
+      ),
     });
   }
 

@@ -72,6 +72,22 @@ class Solicitud(models.Model):
         related_name="motivos_rechazo_solicitud"
     )
 
+    tipoModalidad = models.ForeignKey(
+        TipoMaestra,
+        db_column="TIPO_MODALIDAD",
+        on_delete=models.PROTECT,
+        related_name="modalidades_solicitud"
+    )
+
+    tipoProioridad = models.ForeignKey(
+        TipoMaestra,
+        db_column="TIPO_PRIORIDAD",
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        related_name="prioridades_solicitud"
+    )
+
     def __str__(self):
         return f"Solicitud #{self.id} - {self.cliente}"
 

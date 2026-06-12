@@ -28,7 +28,7 @@ export const routes: Routes = [
       {
         path: 'inicio',
         canActivate: [roleGuard('CLIENTE')],
-        loadComponent: () => import('./pages/cliente-home/cliente-home').then(m => m.ClienteHomeComponent)
+        loadComponent: () => import('./pages/inicio/inicio').then(m => m.InicioComponent)
       },
       {
         path: 'buscar',
@@ -99,6 +99,16 @@ export const routes: Routes = [
         path: 'historial-cliente',
         canActivate: [roleGuard('CLIENTE', 'ADMIN')],
         loadComponent: () => import('./pages/historial-cliente/historial-cliente').then(m => m.HistorialClienteComponent)
+      },
+      {
+        path: 'seguimiento-tiempo-real',
+        canActivate: [roleGuard('ADMIN')],
+        loadComponent: () => import('./pages/seguimiento-tiempo-real/seguimiento-tiempo-real').then(m => m.SeguimientoTiempoRealComponent)
+      },
+      {
+        path: 'novedades-sin-resolver',
+        canActivate: [roleGuard('ADMIN')],
+        loadComponent: () => import('./pages/novedades-sin-resolver/novedades-sin-resolver').then(m => m.NovedadesSinResolverComponent)
       },
       {
         path: 'mi-perfil',

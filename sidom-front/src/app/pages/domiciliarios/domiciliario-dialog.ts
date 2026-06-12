@@ -33,13 +33,14 @@ export class DomiciliarioDialogComponent {
     apellidosDomiciliario:      [this.data?.apellidosDomiciliario ?? '',      [Validators.required, Validators.minLength(2)]],
     telefonoDomiciliario:       [this.data?.telefonoDomiciliario ?? '',       [Validators.required, Validators.pattern(/^\d+$/)]],
     tipoVehiculoDomiciliario:   [this.data?.tipoVehiculoDomiciliario ?? '',   [Validators.required]],
-    placaDomiciliario:          [this.data?.placaDomiciliario ?? '',          [Validators.required, Validators.pattern(/^[A-Za-z]{3}\d{3}$/)]],
+    placaDomiciliario:          [this.data?.placaDomiciliario ?? '',          [Validators.required, Validators.pattern(/^[A-Za-z]{3}-?[0-9]{2,3}-?[A-Za-z0-9]?$/)]],
   });
 
   save() {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.saving = true;
     const val = this.form.value as Domiciliario;
+    val.placaDomiciliario = val.placaDomiciliario?.trim().toUpperCase();
     const obs = this.isEdit
       ? this.service.put(this.data!.id!, val)
       : this.service.post(val);

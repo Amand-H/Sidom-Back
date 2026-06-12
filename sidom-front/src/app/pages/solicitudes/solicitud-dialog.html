@@ -57,6 +57,19 @@
       </div>
       <div class="form-row">
         <mat-form-field appearance="outline">
+          <mat-label>Modalidad</mat-label>
+          <mat-select formControlName="tipoModalidad">
+            @for (t of tiposPorCategoria('CAT_MODALIDAD'); track t.id) {
+              <mat-option [value]="t.id">{{ t.nombreTipo }}</mat-option>
+            }
+          </mat-select>
+          @if (form.get('tipoModalidad')?.hasError('required')) {
+            <mat-error>Requerida</mat-error>
+          }
+        </mat-form-field>
+      </div>
+      <div class="form-row">
+        <mat-form-field appearance="outline">
           <mat-label>Estado (automático)</mat-label>
           <mat-select formControlName="tipoEstado">
             <mat-option [value]="null">Asignar automáticamente</mat-option>

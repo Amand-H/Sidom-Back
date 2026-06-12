@@ -40,6 +40,7 @@ export class MiPerfilComponent implements OnInit {
   showCurrent = signal(false);
   showNew     = signal(false);
   showConfirm = signal(false);
+  puntajeDomiciliario = signal<number | null>(null);
 
   // Formulario info personal (se rellena al cargar)
   infoForm = this.fb.group({
@@ -103,6 +104,14 @@ export class MiPerfilComponent implements OnInit {
       tipoVehiculo:   d.tipoVehiculoDomiciliario,
       placa:          d.placaDomiciliario,
     });
+    this.puntajeDomiciliario.set(d.puntajeDomiciliario ?? 100);
+  }
+
+  puntajeClass(): string {
+    const v = this.puntajeDomiciliario() ?? 100;
+    if (v >= 80) return 'puntaje-bueno';
+    if (v >= 50) return 'puntaje-medio';
+    return 'puntaje-bajo';
   }
 
   guardarInfo() {
@@ -137,7 +146,7 @@ export class MiPerfilComponent implements OnInit {
         apellidosDomiciliario:    v.apellidos!,
         telefonoDomiciliario:     v.telefono!,
         tipoVehiculoDomiciliario: v.tipoVehiculo!,
-        placaDomiciliario:        v.placa!,
+        placaDomiciliario:        v.placa!.trim().toUpperCase(),
       }).subscribe({
         next: d => {
           this.patchDomiciliario(d);

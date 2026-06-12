@@ -43,6 +43,14 @@
         <mat-header-cell *matHeaderCellDef>Placa</mat-header-cell>
         <mat-cell *matCellDef="let r"><strong>{{ r.placaDomiciliario }}</strong></mat-cell>
       </ng-container>
+      <ng-container matColumnDef="puntaje">
+        <mat-header-cell *matHeaderCellDef mat-sort-header>Puntaje</mat-header-cell>
+        <mat-cell *matCellDef="let r">
+          <span class="badge" [class]="puntajeClass(r.puntajeDomiciliario)">
+            {{ r.puntajeDomiciliario ?? 100 }} pts
+          </span>
+        </mat-cell>
+      </ng-container>
       <ng-container matColumnDef="acciones">
         <mat-header-cell *matHeaderCellDef>Acciones</mat-header-cell>
         <mat-cell *matCellDef="let r">

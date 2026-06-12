@@ -84,6 +84,44 @@ class SeguimientoEntrega(models.Model):
         related_name="seguimientos"
     )
 
+    tiempoGarantizado = models.IntegerField(
+        db_column="SEGU_TIEMPO_GARANTIZADO",
+        null=True,
+        blank=True
+    )
+
+    compValor = models.DecimalField(
+        db_column="SEGU_COMP_VALOR",
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True
+    )
+
+    compFecha = models.DateField(
+        db_column="SEGU_COMP_FECHA",
+        null=True,
+        blank=True
+    )
+
+    tipoComp = models.ForeignKey(
+        TipoMaestra,
+        db_column="TIPO_COMP",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="comps_seguimiento"
+    )
+
+    tipoEstadoComp = models.ForeignKey(
+        TipoMaestra,
+        db_column="TIPO_ESTADO_COMP",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="estados_comp_seguimiento"
+    )
+
     def save(self, *args, **kwargs):
         if self.fechaRealSeguimiento:
             self.cumplimientoSeguimiento = (

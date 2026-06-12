@@ -101,3 +101,54 @@
   background: linear-gradient(135deg, #4a148c, #7b1fa2) !important;
   box-shadow: 0 4px 12px rgba(74,20,140,0.3) !important;
 }
+
+/* ── Puntaje domiciliario ── */
+.puntaje-card {
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-top: 12px;
+  border: 2px solid transparent;
+}
+.puntaje-bueno { background: #f1f8e9; border-color: #aed581; }
+.puntaje-medio { background: #fff8e1; border-color: #ffe082; }
+.puntaje-bajo  { background: #fff3e0; border-color: #ffcc80; }
+
+.puntaje-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: #555;
+  margin-bottom: 8px;
+}
+.puntaje-bueno .puntaje-label .material-icons { color: #558b2f; }
+.puntaje-medio .puntaje-label .material-icons { color: #f57f17; }
+.puntaje-bajo  .puntaje-label .material-icons { color: #e65100; }
+
+.puntaje-valor {
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+.puntaje-bueno .puntaje-valor { color: #2e7d32; }
+.puntaje-medio .puntaje-valor { color: #f57f17; }
+.puntaje-bajo  .puntaje-valor { color: #c62828; }
+.puntaje-max { font-size: 18px; font-weight: 400; color: #999; }
+
+.puntaje-barra {
+  height: 8px;
+  border-radius: 10px;
+  background: #e0e0e0;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.puntaje-fill { height: 100%; border-radius: 10px; transition: width .5s; }
+.puntaje-bueno .puntaje-fill { background: #66bb6a; }
+.puntaje-medio .puntaje-fill { background: #ffa726; }
+.puntaje-bajo  .puntaje-fill { background: #ef5350; }
+
+.puntaje-desc { font-size: 12px; color: #666; margin: 0; }

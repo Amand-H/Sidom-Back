@@ -14,56 +14,73 @@
   <div class="pd-empty">
     <span class="material-icons">inbox</span>
     <h3>No hay pedidos disponibles</h3>
-    <p>En cuanto el administrador publique pedidos, aparecerán aquí.</p>
+    <p>En cuanto se publiquen pedidos, aparecerán aquí.</p>
     <button mat-stroked-button (click)="load()">
       <mat-icon>refresh</mat-icon> Volver a intentar
     </button>
   </div>
 } @else {
   <div class="pd-grid">
-    @for (card of pedidos(); track card.disp.id) {
-      <div class="pd-card">
+    @for (p of pedidos(); track p.SOLI_DISP_ID) {
+      <div class="pd-card" [class.express]="isExpress(p)">
 
         <div class="pd-card-top">
           <div class="pd-svc-icon">
-            <span class="material-icons">{{ svcIcon(card.servicio) }}</span>
+            <span class="material-icons">{{ svcIcon(p.SERVICIO) }}</span>
           </div>
           <div class="pd-svc-info">
-            <span class="pd-svc-name">{{ card.servicio }}</span>
+            <span class="pd-svc-name">{{ p.SERVICIO }}</span>
             <span class="pd-svc-zona">
-              <span class="material-icons">location_on</span>{{ card.zona }}
+              <span class="material-icons">location_on</span>{{ p.ZONA }}
             </span>
           </div>
-          <span class="badge info">#{{ card.disp.id }}</span>
+          <div class="pd-badges">
+            @if (isExpress(p)) {
+              <span class="badge express-badge">
+                <mat-icon style="font-size:13px;vertical-align:middle">bolt</mat-icon>
+                Express
+              </span>
+            }
+            @if (p.TIPO_PUBLICACION === 'AGRUPADA') {
+              <span class="badge info">Grupo #{{ p.GRUPO }}</span>
+            }
+            <span [class]="alertaClass(p.ALERTA)">{{ p.ALERTA }}</span>
+          </div>
         </div>
 
-        <div class="pd-desc">{{ card.descripcion }}</div>
+        <div class="pd-client-row">
+          <mat-icon style="font-size:15px;vertical-align:middle;color:#666">person</mat-icon>
+          <span>{{ p.CLIENTE }}</span>
+          <span class="pd-tel">{{ p.CLIE_TELEFONO }}</span>
+        </div>
 
         <div class="pd-addresses">
-          @if (card.dirRecogida) {
+          @if (p.DIR_RECOGIDA) {
             <div class="pd-addr-row">
               <span class="addr-dot green"></span>
-              <span>{{ card.dirRecogida }}</span>
+              <span>{{ p.DIR_RECOGIDA }}</span>
             </div>
           }
           <div class="pd-addr-row">
             <span class="addr-dot red"></span>
-            <span>{{ card.dirEntrega }}</span>
+            <span>{{ p.DIR_ENTREGA }}</span>
           </div>
         </div>
 
         <div class="pd-card-footer">
           <span class="pd-fecha">
             <mat-icon style="font-size:14px;vertical-align:middle">schedule</mat-icon>
-            {{ card.disp.fechaPublicacionSolicitudDisponible | slice:0:10 }}
+            hace {{ p.MINUTOS_PUBLICADA }} min
           </span>
-          <button mat-flat-button class="btn-aceptar" [disabled]="card.accepting" (click)="aceptar(card)">
-            @if (card.accepting) {
+          <button mat-flat-button class="btn-aceptar"
+            [disabled]="accepting() === p.SOLI_DISP_ID"
+            (click)="aceptar(p)">
+            @if (accepting() === p.SOLI_DISP_ID) {
               <mat-spinner diameter="16" />
             } @else {
               <mat-icon>how_to_reg</mat-icon>
             }
-            Aceptar pedido
+            Aceptar
           </button>
         </div>
 

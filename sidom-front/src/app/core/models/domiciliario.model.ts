@@ -6,4 +6,5 @@ export interface Domiciliario {
   telefonoDomiciliario: string;
   tipoVehiculoDomiciliario: string;
   placaDomiciliario: string;
+  puntajeDomiciliario?: number;
 }

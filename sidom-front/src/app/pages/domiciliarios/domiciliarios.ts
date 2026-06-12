@@ -6,7 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { DomiciliarioService } from '../../core/services/domiciliario.service';
 import { Domiciliario } from '../../core/models/domiciliario.model';
 import { DomiciliarioDialogComponent } from './domiciliario-dialog';
@@ -23,7 +23,7 @@ export class DomiciliariosComponent implements OnInit {
 
   loading    = signal(true);
   dataSource = new MatTableDataSource<Domiciliario>([]);
-  displayedColumns = ['identificacion', 'nombre', 'telefono', 'vehiculo', 'placa', 'acciones'];
+  displayedColumns = ['identificacion', 'nombre', 'telefono', 'vehiculo', 'placa', 'puntaje', 'acciones'];
 
   @ViewChild(MatSort)    set sort(s: MatSort)       { this.dataSource.sort = s; }
   @ViewChild(MatPaginator) set pag(p: MatPaginator) { this.dataSource.paginator = p; }
@@ -43,6 +43,13 @@ export class DomiciliariosComponent implements OnInit {
   openDialog(item?: Domiciliario) {
     this.dialog.open(DomiciliarioDialogComponent, { data: item ?? null, width: '600px' })
       .afterClosed().subscribe(r => { if (r) this.load(); });
+  }
+
+  puntajeClass(p: number | undefined): string {
+    const v = p ?? 100;
+    if (v >= 80) return 'success';
+    if (v >= 50) return 'warning';
+    return 'danger';
   }
 
   delete(id: number) {

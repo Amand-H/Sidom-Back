@@ -14,6 +14,11 @@ export interface SeguimientoEntrega {
   asignacion: number;
   historialEstadoEntrega: number;
   estadoActualCodigo?: string;
+  tiempoGarantizado?: number | null;
+  compValor?: number | string | null;
+  compFecha?: string | null;
+  tipoComp?: number | null;
+  tipoEstadoComp?: number | null;
 }
 
 export interface Novedad {

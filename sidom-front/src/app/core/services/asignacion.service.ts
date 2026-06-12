@@ -18,6 +18,27 @@ export class AsignacionService extends ApiService {
   panelDisponibles(): Observable<SolicitudDisponible[]> {
     return this.http.get<SolicitudDisponible[]>(`${this.baseUrl}/asignaciones/solicitudes-disponibles/panel/`);
   }
+  panelPool(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/asignaciones/solicitudes-disponibles/panel-pool/`);
+  }
+  asignarExpress(soliDispId: number): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/asignaciones/solicitudes-disponibles/${soliDispId}/asignar-express/`, {});
+  }
+  asignacionesActivas(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/asignaciones/asignaciones/activas/`);
+  }
+  misActivas(domiciliarioId?: number): Observable<any[]> {
+    const params = domiciliarioId ? `?domiciliario_id=${domiciliarioId}` : '';
+    return this.http.get<any[]>(`${this.baseUrl}/asignaciones/asignaciones/mis-activas/${params}`);
+  }
+  historialDomi(domiciliarioId?: number): Observable<any[]> {
+    const params = domiciliarioId ? `?domiciliario_id=${domiciliarioId}` : '';
+    return this.http.get<any[]>(`${this.baseUrl}/asignaciones/asignaciones/historial-domi/${params}`);
+  }
+  historialCliente(clienteId?: number): Observable<any[]> {
+    const params = clienteId ? `?cliente_id=${clienteId}` : '';
+    return this.http.get<any[]>(`${this.baseUrl}/asignaciones/asignaciones/historial-cliente/${params}`);
+  }
 
   getAllAsignaciones(): Observable<Asignacion[]>           { return this.getList<Asignacion>('asignaciones/asignaciones'); }
   postAsignacion(d: Asignacion): Observable<Asignacion>   { return this.create<Asignacion>('asignaciones/asignaciones', d); }

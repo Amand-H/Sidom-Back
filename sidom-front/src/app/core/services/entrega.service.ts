@@ -26,5 +26,18 @@ export class EntregaService extends ApiService {
   resolverNovedad(id: number, solucion: string): Observable<Novedad> {
     return this.http.post<Novedad>(`${this.baseUrl}/entregas/novedades/${id}/resolver/`, { solucion });
   }
-  novedadesSinResolver(): Observable<Novedad[]>                { return this.http.get<Novedad[]>(`${this.baseUrl}/entregas/novedades/sin-resolver/`); }
+  novedadesSinResolver(): Observable<any[]>                    { return this.http.get<any[]>(`${this.baseUrl}/entregas/novedades/sin-resolver/`); }
+  resolverNovedadSp(noveId: number, solucion: string): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/entregas/novedades/resolver-novedad/`, { nove_id: noveId, solucion });
+  }
+  cambiarEstadoSp(seguId: number, estadoCod: string, observacion = ''): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/entregas/seguimientos-entrega/cambiar-estado-sp/`, { segu_id: seguId, estado_cod: estadoCod, observacion });
+  }
+  actualizarDesempeno(seguId: number): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/entregas/seguimientos-entrega/actualizar-desempeno/`, { segu_id: seguId });
+  }
+  historialDesempeno(): Observable<any[]>                      { return this.http.get<any[]>(`${this.baseUrl}/entregas/seguimientos-entrega/historial-desempeno/`); }
+  patchSeguimiento(id: number, data: Partial<SeguimientoEntrega>): Observable<SeguimientoEntrega> {
+    return this.http.patch<SeguimientoEntrega>(`${this.baseUrl}/entregas/seguimientos-entrega/${id}/`, data);
+  }
 }

@@ -118,6 +118,11 @@ class Domiciliario(models.Model):
         help_text="Ingrese la placa del vehículo"
     )
 
+    puntajeDomiciliario = models.IntegerField(
+        db_column="DOMI_PUNTAJE",
+        default=100
+    )
+
     def __str__(self):
         return f"{self.nombresDomiciliario} {self.apellidosDomiciliario}"
 

@@ -1,3 +1,6 @@
+import json
+
+from django.db import connection
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -53,6 +56,24 @@ class SolicitudViewSet(viewsets.ModelViewSet):
         })
 
     @action(detail=False, methods=["get"])
+    def cotizacion(self, request):
+        tipo_zona_id = request.query_params.get("tipo_zona")
+        if not tipo_zona_id:
+            return Response({"detail": "Parámetro tipo_zona requerido."}, status=400)
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT FN_P1_COTIZACION_CAPACIDAD_ZONA(%s)", [tipo_zona_id])
+            row = cursor.fetchone()
+        return Response(json.loads(row[0]) if row and row[0] else {})
+
+    @action(detail=False, methods=["get"])
+    def panel_vistas(self, request):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM VW_P1_PANEL_SOLICITUDES")
+            cols = [d[0] for d in cursor.description]
+            rows = [dict(zip(cols, row)) for row in cursor.fetchall()]
+        return Response(rows)
+
+    @action(detail=False, methods=["get"])
     def estadisticas(self, request):
         return Response(estadisticas_solicitudes())
 
@@ -64,3 +85,27 @@ class SolicitudViewSet(viewsets.ModelViewSet):
             item["alerta"] = alerta_solicitud(solicitud)
             data.append(item)
         return Response(data)
+
+    @action(detail=False, methods=["post"], url_path="procesar-recurrentes")
+    def procesar_recurrentes(self, request):
+        with connection.cursor() as cursor:
+            cursor.execute("CALL SP_P1_PROCESAR_SOLICITUDES_RECURRENTES(@resultado)")
+            cursor.execute("SELECT @resultado")
+            row = cursor.fetchone()
+        resultado = row[0] if row else None
+        try:
+            resultado = json.loads(resultado) if resultado else {}
+        except (TypeError, ValueError):
+            resultado = {"resultado": resultado}
+        return Response(resultado)
+
+    @action(detail=False, methods=["get"], url_path="recurrentes")
+    def recurrentes(self, request):
+        with connection.cursor() as cursor:
+            try:
+                cursor.execute("SELECT * FROM VW_P1_SOLICITUDES_RECURRENTES_ACTIVAS")
+            except Exception:
+                cursor.execute("SELECT * FROM TBL_SOLICITUDES_RECURRENTES")
+            cols = [d[0] for d in cursor.description]
+            rows = [dict(zip(cols, row)) for row in cursor.fetchall()]
+        return Response(rows)

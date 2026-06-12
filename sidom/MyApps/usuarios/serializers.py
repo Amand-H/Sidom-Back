@@ -36,6 +36,10 @@ class ClienteSerializer(serializers.ModelSerializer):
     
 
 class DomiciliarioSerializer(serializers.ModelSerializer):
+    # Override to allow normalization (strip + upper) before any regex check.
+    # The model's placa_validator only accepts uppercase and would fire before
+    # validate_placaDomiciliario gets a chance to normalize the input.
+    placaDomiciliario = serializers.CharField(max_length=20)
 
     class Meta:
         model = Domiciliario
@@ -62,7 +66,7 @@ class DomiciliarioSerializer(serializers.ModelSerializer):
         return value
 
     def validate_placaDomiciliario(self, value):
-        value = value.upper()
+        value = value.strip().upper()
 
         if len(value) < 5:
             raise serializers.ValidationError("La placa debe tener mínimo 5 caracteres")

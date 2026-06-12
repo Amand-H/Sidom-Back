@@ -33,6 +33,10 @@ CATALOGOS_INICIALES = {
         "Tipos de novedad / cierre",
         ["CLI_AUSENTE", "DIR_INCORRECTA", "PED_DANADO", "ACCIDENTE", "ROBO", "RESUELTA"],
     ),
+    "CAT_MODALIDAD": (
+        "Modalidades de entrega",
+        ["MOD_ESTANDAR", "MOD_EXPRESS"],
+    ),
 }
 
 

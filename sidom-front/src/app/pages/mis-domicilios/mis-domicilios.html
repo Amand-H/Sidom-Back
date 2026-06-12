@@ -111,6 +111,21 @@
             }
           </div>
 
+          <!-- Compensación por retraso -->
+          @if (card.compensacion) {
+            <div class="oc-compensacion">
+              <span class="material-icons oc-comp-icon">payments</span>
+              <div class="oc-comp-body">
+                <strong>Compensación por entrega tardía</strong>
+                <span class="oc-comp-valor">{{ card.compensacion.valorFormatted }}</span>
+                @if (card.compensacion.fecha) {
+                  <span class="oc-comp-fecha">Emitida: {{ card.compensacion.fecha }}</span>
+                }
+              </div>
+              <span class="oc-comp-estado">{{ card.compensacion.estadoNombre }}</span>
+            </div>
+          }
+
         </div>
       }
     </div>

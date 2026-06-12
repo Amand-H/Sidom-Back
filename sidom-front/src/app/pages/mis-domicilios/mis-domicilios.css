@@ -271,6 +271,40 @@
 .oc-address .material-icons { font-size: 15px; color: #ef5350; flex-shrink: 0; }
 .oc-address-from { color: #8090b0; display: flex; align-items: center; gap: 2px; }
 
+/* Compensación */
+.oc-compensacion {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: #fff8e1;
+  border-top: 1px solid #ffe082;
+}
+
+.oc-comp-icon { font-size: 22px; color: #f57c00; flex-shrink: 0; }
+
+.oc-comp-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.oc-comp-body strong { font-size: 12px; color: #e65100; }
+.oc-comp-valor { font-size: 16px; font-weight: 700; color: #bf360c; }
+.oc-comp-fecha { font-size: 11px; color: #a05000; }
+
+.oc-comp-estado {
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  background: #ffe0b2;
+  color: #e65100;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 /* ===== Panel derecho: mapa ===== */
 .map-panel { position: sticky; top: 20px; }
 

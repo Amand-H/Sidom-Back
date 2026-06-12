@@ -1,9 +1,23 @@
+import json
 from datetime import datetime, time
 
+from django.db import connection
 from django.utils import timezone
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+
+
+def _call_sp(sp_call, params=None):
+    with connection.cursor() as cursor:
+        cursor.execute(sp_call, params or [])
+        cursor.execute("SELECT @resultado")
+        row = cursor.fetchone()
+    resultado = row[0] if row else None
+    try:
+        return json.loads(resultado) if resultado else {}
+    except (TypeError, ValueError):
+        return {"resultado": resultado}
 
 from MyApps.entregas.models import (
     HistorialEstadoEntrega,
@@ -64,6 +78,56 @@ class SeguimientoEntregaViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["get"], url_path="tiempo-real")
     def tiempo_real(self, request):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM VW_P3_SEGUIMIENTO_TIEMPO_REAL")
+            cols = [d[0] for d in cursor.description]
+            data = [dict(zip(cols, row)) for row in cursor.fetchall()]
+
+        segu_ids = [r["SEGU_ID"] for r in data if r.get("SEGU_ID")]
+        comp_map = {
+            s.id: float(s.compValor)
+            for s in SeguimientoEntrega.objects.filter(id__in=segu_ids).only("id", "compValor")
+            if s.compValor is not None
+        }
+        for row in data:
+            row["compValor"] = comp_map.get(row.get("SEGU_ID"))
+
+        return Response(data)
+
+    @action(detail=False, methods=["post"], url_path="cambiar-estado-sp")
+    def cambiar_estado_sp(self, request):
+        segu_id    = request.data.get("segu_id")
+        estado_cod = request.data.get("estado_cod")
+        observacion = request.data.get("observacion", "")
+        if not segu_id or not estado_cod:
+            return Response({"detail": "segu_id y estado_cod son requeridos."}, status=400)
+        result = _call_sp(
+            "CALL SP_P3_CAMBIAR_ESTADO_ENTREGA(%s, %s, %s, @resultado)",
+            [segu_id, estado_cod, observacion],
+        )
+        return Response(result)
+
+    @action(detail=False, methods=["post"], url_path="actualizar-desempeno")
+    def actualizar_desempeno(self, request):
+        segu_id = request.data.get("segu_id")
+        if not segu_id:
+            return Response({"detail": "segu_id es requerido."}, status=400)
+        result = _call_sp(
+            "CALL SP_P3_ACTUALIZAR_HISTORIAL_DESEMPENO(%s, @resultado)",
+            [segu_id],
+        )
+        return Response(result)
+
+    @action(detail=False, methods=["get"], url_path="historial-desempeno")
+    def historial_desempeno(self, request):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM VW_P3_HISTORIAL_DESEMPENO_ZONA")
+            cols = [d[0] for d in cursor.description]
+            data = [dict(zip(cols, row)) for row in cursor.fetchall()]
+        return Response(data)
+
+    @action(detail=False, methods=["get"], url_path="tiempo-real-legacy")
+    def tiempo_real_legacy(self, request):
         data = []
         for seguimiento in self.get_queryset():
             asignacion = seguimiento.asignacion
@@ -104,25 +168,20 @@ class NovedadViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["get"], url_path="sin-resolver")
     def sin_resolver(self, request):
-        qs = self.get_queryset().exclude(tipoEstado__codigoTipo="RESUELTA")
-        data = []
-        for novedad in qs:
-            minutos = 0
-            if novedad.fechaNovedad:
-                inicio = timezone.make_aware(
-                    datetime.combine(novedad.fechaNovedad, time.min),
-                    timezone.get_current_timezone(),
-                )
-                minutos = int((timezone.now() - inicio).total_seconds() // 60)
-
-            prioridad = "NORMAL"
-            if minutos > 60:
-                prioridad = "CRITICA"
-            elif minutos > 30:
-                prioridad = "URGENTE"
-
-            item = self.get_serializer(novedad).data
-            item["minutosSinResolver"] = minutos
-            item["prioridad"] = prioridad
-            data.append(item)
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM VW_P3_NOVEDADES_SIN_RESOLVER")
+            cols = [d[0] for d in cursor.description]
+            data = [dict(zip(cols, row)) for row in cursor.fetchall()]
         return Response(data)
+
+    @action(detail=False, methods=["post"], url_path="resolver-novedad")
+    def resolver_novedad_sp(self, request):
+        nove_id  = request.data.get("nove_id")
+        solucion = request.data.get("solucion", "")
+        if not nove_id:
+            return Response({"detail": "nove_id es requerido."}, status=400)
+        result = _call_sp(
+            "CALL SP_P3_RESOLVER_NOVEDAD(%s, %s, @resultado)",
+            [nove_id, solucion],
+        )
+        return Response(result)

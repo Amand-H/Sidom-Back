@@ -24,7 +24,15 @@ class SolicitudSerializer(serializers.ModelSerializer):
             "tipoMotivoRechazo": {
                 "required": False,
                 "allow_null": True
-            }
+            },
+            "tipoModalidad": {
+                "required": False,
+                "allow_null": True
+            },
+            "tipoProioridad": {
+                "required": False,
+                "allow_null": True
+            },
         }
 
     def validate_descripcionSolicitud(self, value):

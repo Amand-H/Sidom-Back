@@ -71,6 +71,9 @@ def validar_y_clasificar_solicitud(solicitud):
         solicitud.tipoEstado = obtener_tipo("VALIDADA")
         solicitud.tipoMotivoRechazo = None
 
+    if not solicitud.tipoModalidad_id:
+        solicitud.tipoModalidad = obtener_tipo("MOD_ESTANDAR")
+
     return solicitud
 
 

@@ -11,9 +11,17 @@ import { AsignacionService } from '../../core/services/asignacion.service';
 import { DomiciliarioService } from '../../core/services/domiciliario.service';
 import { TipoMaestraService } from '../../core/services/tipo-maestra.service';
 import { TrackingService } from '../../core/services/tracking.service';
+import { EntregaService } from '../../core/services/entrega.service';
 import { Solicitud } from '../../core/models/solicitud.model';
 import { Domiciliario } from '../../core/models/domiciliario.model';
 import { PedidoDialogComponent } from './pedido-dialog';
+
+export interface CompensacionInfo {
+  valor: number;
+  valorFormatted: string;
+  fecha: string;
+  estadoNombre: string;
+}
 
 export interface DomicilioCard {
   solicitud: Solicitud;
@@ -25,6 +33,8 @@ export interface DomicilioCard {
   tipoServicioNombre: string;
   tipoZonaNombre: string;
   asignacionId: number | null;
+  seguimientoId: number | null;
+  compensacion: CompensacionInfo | null;
 }
 
 const TIMELINE: { codigo: string; label: string; icon: string }[] = [
@@ -47,6 +57,7 @@ export class MisDomiciliosComponent implements OnInit, AfterViewInit, OnDestroy 
   private domSvc       = inject(DomiciliarioService);
   private tipoSvc      = inject(TipoMaestraService);
   private trackingSvc  = inject(TrackingService);
+  private entregaSvc   = inject(EntregaService);
   private dialog       = inject(MatDialog);
 
   @ViewChild('mapEl') mapEl!: ElementRef;
@@ -88,11 +99,13 @@ export class MisDomiciliosComponent implements OnInit, AfterViewInit, OnDestroy 
       domiciliarios: this.domSvc.getAll(),
       tipos:         this.tipoSvc.getAll(),
       ubicaciones:   this.trackingSvc.getAll(),
+      seguimientos:  this.entregaSvc.getAllSeguimientos(),
     }).subscribe({
-      next: ({ solicitudes, disponibles, asignaciones, domiciliarios, tipos, ubicaciones }) => {
+      next: ({ solicitudes, disponibles, asignaciones, domiciliarios, tipos, ubicaciones, seguimientos }) => {
         const tiposMap  = new Map(tipos.map(t => [t.id!, t]));
         const codigoMap = new Map(tipos.map(t => [t.id!, t.codigoTipo ?? '']));
         const domMap    = new Map(domiciliarios.map(d => [d.id!, d]));
+        const seguMap   = new Map(seguimientos.map(s => [s.asignacion, s]));
 
         // Solo pedidos activos (excluye finalizados que van al historial)
         const FINALES = new Set(['ENTREGADA', 'RECHAZADA']);
@@ -122,8 +135,20 @@ export class MisDomiciliosComponent implements OnInit, AfterViewInit, OnDestroy 
           const asig   = disp ? misAsignaciones.find(a => a.solicitudDisponible === disp.id) : null;
           const dom    = disp?.domiciliario ? (domMap.get(disp.domiciliario) ?? null) : null;
           const uloc   = asig ? (ultimaUbicMap.get(asig.id!) ?? null) : null;
+          const segu   = asig ? (seguMap.get(asig.id!) ?? null) : null;
           const estadoCodigo = codigoMap.get(sol.tipoEstado ?? 0) ?? '';
           const estadoNombre = tiposMap.get(sol.tipoEstado ?? 0)?.nombreTipo ?? 'Sin estado';
+
+          let compensacion: CompensacionInfo | null = null;
+          if (segu && Number(segu.compValor) > 0) {
+            const valor = Number(segu.compValor);
+            compensacion = {
+              valor,
+              valorFormatted: valor.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }),
+              fecha: segu.compFecha ?? '',
+              estadoNombre: segu.tipoEstadoComp ? (tiposMap.get(segu.tipoEstadoComp)?.nombreTipo ?? 'Pendiente') : 'Pendiente',
+            };
+          }
 
           return {
             solicitud:          sol,
@@ -135,6 +160,8 @@ export class MisDomiciliosComponent implements OnInit, AfterViewInit, OnDestroy 
             tipoServicioNombre: tiposMap.get(sol.tipoServicio)?.nombreTipo ?? '',
             tipoZonaNombre:     tiposMap.get(sol.tipoZona)?.nombreTipo ?? '',
             asignacionId:       asig?.id ?? null,
+            seguimientoId:      segu?.id ?? null,
+            compensacion,
           };
         });
 

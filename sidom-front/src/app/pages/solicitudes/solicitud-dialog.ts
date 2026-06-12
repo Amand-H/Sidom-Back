@@ -42,6 +42,7 @@ export class SolicitudDialogComponent implements OnInit {
     cliente:                    [this.data?.cliente ?? null,                  [Validators.required]],
     tipoZona:                   [this.data?.tipoZona ?? null,                 [Validators.required]],
     tipoServicio:               [this.data?.tipoServicio ?? null,             [Validators.required]],
+    tipoModalidad:              [this.data?.tipoModalidad ?? null,            [Validators.required]],
     tipoEstado:                 [this.data?.tipoEstado ?? null,               []],
     tipoMotivoRechazo:          [this.data?.tipoMotivoRechazo ?? null,        []],
   });
