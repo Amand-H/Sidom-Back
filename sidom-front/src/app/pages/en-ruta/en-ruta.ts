@@ -10,6 +10,7 @@ import { AsignacionService } from '../../core/services/asignacion.service';
 import { TrackingService } from '../../core/services/tracking.service';
 import { AuthService } from '../../core/services/auth.service';
 import { NovedadRapidaDialogComponent } from './novedad-rapida-dialog';
+import { EmergenciaService } from '../../core/emergencia.service';
 
 export interface EntregaActiva {
   seguimientoId: number;
@@ -44,6 +45,7 @@ export class EnRutaComponent implements OnInit, AfterViewInit, OnDestroy {
   private auth        = inject(AuthService);
   private dialog      = inject(MatDialog);
   private snack       = inject(MatSnackBar);
+  private emergenciaService = inject(EmergenciaService);
 
   @ViewChild('mapEl') mapEl!: ElementRef;
 
@@ -227,5 +229,49 @@ export class EnRutaComponent implements OnInit, AfterViewInit, OnDestroy {
   formatHora(h: string | null) {
     if (!h) return 'Sin GPS';
     return new Date(h).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' });
+  }
+  sosEnviado = false;
+  sosLoading = false;
+
+  activarSOS() {
+    if (this.sosLoading || this.sosEnviado) return;
+    this.sosLoading = true;
+
+    const enviar = (lat: number | null, lng: number | null) => {
+      const entrega = this.entregas()[0];
+      if (!entrega) {
+        alert('No hay entregas activas para reportar emergencia.');
+        this.sosLoading = false;
+        return;
+      }
+
+      this.emergenciaService.registrarEmergencia({
+        asignacion_id: entrega.asignacionId,
+        domiciliario_id: 0,
+        tipo: 'EMERGENCIA',
+        descripcion: 'Emergencia activada desde botón SOS en ruta',
+        latitud: lat,
+        longitud: lng,
+      }).subscribe({
+        next: () => {
+          this.sosEnviado = true;
+          this.sosLoading = false;
+        },
+        error: (err: any) => {
+          console.error(err);
+          this.sosLoading = false;
+          alert('Error al enviar emergencia. Intenta de nuevo.');
+        }
+      });
+    };
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        pos => enviar(pos.coords.latitude, pos.coords.longitude),
+        () => enviar(null, null)
+      );
+    } else {
+      enviar(null, null);
+    }
   }
 }

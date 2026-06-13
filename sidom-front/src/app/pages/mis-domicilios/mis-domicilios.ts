@@ -42,6 +42,7 @@ const TIMELINE: { codigo: string; label: string; icon: string }[] = [
   { codigo: 'VALIDADA',   label: 'Validada',   icon: 'verified'        },
   { codigo: 'EN_PROCESO', label: 'En camino',  icon: 'delivery_dining' },
   { codigo: 'ENTREGADA',  label: 'Entregado',  icon: 'check_circle'    },
+  { codigo: 'CON_NOVEDAD', label: 'Incidencia', icon: 'warning' },
 ];
 
 @Component({
@@ -262,7 +263,7 @@ export class MisDomiciliosComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   timelineStep(card: DomicilioCard, codigo: string): 'done' | 'active' | 'pending' {
-    const order = ['PENDIENTE', 'VALIDADA', 'EN_PROCESO', 'ENTREGADA'];
+    const order = ['PENDIENTE', 'VALIDADA', 'EN_PROCESO', 'ENTREGADA', 'CON_NOVEDAD'];
     const cardIdx = order.indexOf(card.estadoCodigo);
     const stepIdx = order.indexOf(codigo);
     if (card.estadoCodigo === 'RECHAZADA') return stepIdx === 0 ? 'active' : 'pending';
@@ -289,6 +290,7 @@ export class MisDomiciliosComponent implements OnInit, AfterViewInit, OnDestroy 
 
   badgeClass(codigo: string): string {
     if (codigo === 'ENTREGADA')  return 'badge success';
+    if (codigo === 'CON_NOVEDAD') return 'badge danger';
     if (codigo === 'EN_PROCESO') return 'badge info';
     if (codigo === 'VALIDADA')   return 'badge warning';
     if (codigo === 'RECHAZADA')  return 'badge danger';

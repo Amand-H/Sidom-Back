@@ -99,6 +99,20 @@
       <div #mapEl class="ruta-map"></div>
 
     </div>
+    <!-- Botón SOS de Emergencia -->
+        <div class="sos-container">
+          <button class="btn-sos" (click)="activarSOS()" [disabled]="sosEnviado">
+            <span class="material-icons">sos</span>
+            {{ sosEnviado ? '✅ Emergencia Reportada' : '🆘 BOTÓN SOS' }}
+          </button>
+          @if (sosEnviado) {
+            <div class="sos-confirmacion">
+              <p>⚠️ Administrador notificado</p>
+              <p>📍 Ubicación enviada</p>
+              <p>🚨 Entrega marcada como incidencia</p>
+            </div>
+          }
+        </div>
   </div>
 
 </div>

@@ -26,4 +26,5 @@ urlpatterns = [
     path('api/entregas/', include('MyApps.entregas.urls_viewset')),
     path('api/tracking/', include('MyApps.tracking.urls_viewset')),
     path('api/asignaciones/', include('MyApps.asignaciones.urls_viewset')),
+    path('api/emergencias/', include('emergencias.urls')),
 ]
